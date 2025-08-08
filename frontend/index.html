@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>娱乐中心系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <i class="fas fa-gamepad"></i>
+                    <span>娱乐中心</span>
+                </div>
+                <div class="nav-menu">
+                    <a href="#" class="nav-link" onclick="showSection('home')">首页</a>
+                    <a href="#" class="nav-link" onclick="showSection('games')">游戏大厅</a>
+                    <a href="#" class="nav-link" onclick="showSection('stats')">数据统计</a>
+                    <a href="#" class="nav-link" onclick="showSection('profile')">个人中心</a>
+                </div>
+                <div class="nav-user">
+                    <div id="user-info" class="user-info" style="display: none;">
+                        <span id="username"></span>
+                        <span id="credits" class="credits">0 元</span>
+                        <button onclick="logout()" class="btn btn-outline">退出</button>
+                    </div>
+                    <div id="auth-buttons" class="auth-buttons">
+                        <button onclick="showLogin()" class="btn btn-primary">登录</button>
+                        <button onclick="showRegister()" class="btn btn-outline">注册</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 首页 -->
+            <section id="home-section" class="section active">
+                <div class="hero">
+                    <div class="hero-content">
+                        <h1>🎮 欢迎来到娱乐中心 🎮</h1>
+                        <p>体验精彩的游戏世界，赢取丰厚奖励！</p>
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-users"></i>
+                                <span>10,000+ 玩家</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-trophy"></i>
+                                <span>每日大奖</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-star"></i>
+                                <span>5星好评</span>
+                            </div>
+                        </div>
+                        <button onclick="showSection('games')" class="btn btn-large btn-primary btn-pulse">
+                            <i class="fas fa-rocket"></i> 立即开始游戏
+                        </button>
+                    </div>
+                    <div class="hero-decoration">
+                        <div class="floating-icon" style="--delay: 0s;">🎲</div>
+                        <div class="floating-icon" style="--delay: 1s;">🎰</div>
+                        <div class="floating-icon" style="--delay: 2s;">🎯</div>
+                        <div class="floating-icon" style="--delay: 3s;">🏆</div>
+                        <div class="floating-icon" style="--delay: 4s;">💎</div>
+                        <div class="floating-icon" style="--delay: 5s;">🎊</div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <div class="feature-card">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>刮刮乐</h3>
+                        <p>多种主题刮刮乐，刮出惊喜大奖</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-coins"></i>
+                        <h3>老虎机</h3>
+                        <p>经典老虎机游戏，转出幸运组合</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-circle-notch"></i>
+                        <h3>幸运转盘</h3>
+                        <p>转动命运之轮，获得丰厚奖励</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 游戏大厅 -->
+            <section id="games-section" class="section">
+                <div class="section-header">
+                    <h2>游戏大厅</h2>
+                    <p>选择你喜欢的游戏开始体验</p>
+                </div>
+
+                <div class="game-categories">
+                    <div class="game-category">
+                        <h3><i class="fas fa-ticket-alt"></i> 刮刮乐游戏</h3>
+                        <div id="scratch-games" class="game-grid">
+                            <!-- 刮刮乐游戏将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+
+                    <div class="game-category">
+                        <h3><i class="fas fa-coins"></i> 老虎机游戏</h3>
+                        <div id="slot-games" class="game-grid">
+                            <!-- 老虎机游戏将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+
+                    <div class="game-category">
+                        <h3><i class="fas fa-circle-notch"></i> 幸运转盘</h3>
+                        <div id="wheel-games" class="game-grid">
+                            <!-- 转盘游戏将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 刮刮乐游戏页面 -->
+            <section id="scratch-card-game" class="section">
+                <div class="game-header">
+                    <h2 id="scratch-game-title">刮刮乐</h2>
+                    <button onclick="showSection('games')" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> 返回大厅
+                    </button>
+                </div>
+
+                <div class="scratch-card-container">
+                    <div id="scratch-card" class="scratch-card">
+                        <!-- 刮刮乐卡片将动态生成 -->
+                    </div>
+
+                    <div class="game-controls">
+                        <button id="scratch-settings-btn" onclick="showScratchSettings()" class="btn btn-outline">
+                            <i class="fas fa-cog"></i> 刮刀设置
+                        </button>
+                        <button id="new-game-btn" onclick="startNewGame()" class="btn btn-success" style="display: none;">
+                            <i class="fas fa-plus"></i> 再来一张
+                        </button>
+                        <button id="scratch-all-btn" onclick="scratchAll()" class="btn btn-primary" style="display: none;">
+                            <i class="fas fa-hand-paper"></i> 全部刮开
+                        </button>
+                    </div>
+                </div>
+
+                <div class="game-result" id="game-result" style="display: none;">
+                    <div class="result-content">
+                        <div id="result-icon" class="result-icon"></div>
+                        <h3 id="result-title"></h3>
+                        <div id="result-details" class="result-details"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 数据统计 -->
+            <section id="stats-section" class="section">
+                <div class="section-header">
+                    <h2>数据统计</h2>
+                    <p>查看你的游戏数据和排行榜</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>个人统计</h3>
+                        <div id="user-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">总游戏次数:</span>
+                                <span id="total-games" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">总投入:</span>
+                                <span id="total-bet" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">总收益:</span>
+                                <span id="total-win" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">胜率:</span>
+                                <span id="win-rate" class="stat-value">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>金额排行榜</h3>
+                        <div id="credits-leaderboard" class="leaderboard">
+                            <!-- 排行榜将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 个人中心 -->
+            <section id="profile-section" class="section">
+                <div class="section-header">
+                    <h2>个人中心</h2>
+                    <p>管理你的账户信息</p>
+                </div>
+
+                <div class="profile-content">
+                    <div class="profile-card">
+                        <h3>账户信息</h3>
+                        <div id="profile-info">
+                            <!-- 个人信息将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <h3>游戏历史</h3>
+                        <div id="game-history" class="history-list">
+                            <!-- 游戏历史将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 登录模态框 -->
+        <div id="login-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>用户登录</h3>
+                    <span class="close" onclick="closeModal('login-modal')">&times;</span>
+                </div>
+                <form id="login-form" onsubmit="login(event)">
+                    <div class="form-group">
+                        <label for="login-username">用户名:</label>
+                        <input type="text" id="login-username" placeholder="请输入您的用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">密码:</label>
+                        <input type="password" id="login-password" placeholder="请输入您的密码" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-sign-in-alt"></i> 立即登录
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 注册模态框 -->
+        <div id="register-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>用户注册</h3>
+                    <span class="close" onclick="closeModal('register-modal')">&times;</span>
+                </div>
+                <form id="register-form" onsubmit="register(event)">
+                    <div class="form-group">
+                        <label for="register-username">用户名:</label>
+                        <input type="text" id="register-username" placeholder="请输入3-20个字符的用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">邮箱:</label>
+                        <input type="email" id="register-email" placeholder="请输入您的邮箱地址" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">密码:</label>
+                        <input type="password" id="register-password" placeholder="请输入6位以上的密码" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-user-plus"></i> 立即注册
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 消息提示 -->
+        <div id="message" class="message"></div>
+    </div>
+
+    <!-- 刮刀设置弹窗 -->
+    <div id="scratch-settings-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content scratch-settings-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> 刮刀设置</h3>
+                <button class="modal-close" onclick="hideScratchSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label><i class="fas fa-mouse-pointer"></i> 刮刀样式</label>
+                    <div class="setting-options">
+                        <button class="setting-btn active" data-tool="default" onclick="setScratchTool('default')">
+                            <i class="fas fa-circle"></i> 默认
+                        </button>
+                        <button class="setting-btn" data-tool="coin" onclick="setScratchTool('coin')">
+                            <i class="fas fa-coins"></i> 硬币
+                        </button>
+                        <button class="setting-btn" data-tool="brush" onclick="setScratchTool('brush')">
+                            <i class="fas fa-paint-brush"></i> 刷子
+                        </button>
+                        <button class="setting-btn" data-tool="diamond" onclick="setScratchTool('diamond')">
+                            <i class="fas fa-gem"></i> 钻石
+                        </button>
+                        <button class="setting-btn" data-tool="finger" onclick="setScratchTool('finger')">
+                            <i class="fas fa-hand-point-up"></i> 手指
+                        </button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label><i class="fas fa-hammer"></i> 刮刀硬度</label>
+                    <div class="setting-options">
+                        <button class="setting-btn" data-hardness="soft" onclick="setScratchHardness('soft')">
+                            <i class="fas fa-feather"></i> 柔软
+                        </button>
+                        <button class="setting-btn active" data-hardness="medium" onclick="setScratchHardness('medium')">
+                            <i class="fas fa-circle"></i> 中等
+                        </button>
+                        <button class="setting-btn" data-hardness="hard" onclick="setScratchHardness('hard')">
+                            <i class="fas fa-square"></i> 坚硬
+                        </button>
+                        <button class="setting-btn" data-hardness="ultra" onclick="setScratchHardness('ultra')">
+                            <i class="fas fa-cube"></i> 超硬
+                        </button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label><i class="fas fa-magic"></i> 特效模式</label>
+                    <div class="setting-options">
+                        <button class="setting-btn active" data-effect="normal" onclick="setScratchEffects('normal')">
+                            <i class="fas fa-circle"></i> 普通
+                        </button>
+                        <button class="setting-btn" data-effect="sparkle" onclick="setScratchEffects('sparkle')">
+                            <i class="fas fa-sparkles"></i> 闪光
+                        </button>
+                        <button class="setting-btn" data-effect="fire" onclick="setScratchEffects('fire')">
+                            <i class="fas fa-fire"></i> 火焰
+                        </button>
+                        <button class="setting-btn" data-effect="ice" onclick="setScratchEffects('ice')">
+                            <i class="fas fa-snowflake"></i> 冰霜
+                        </button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label><i class="fas fa-volume-up"></i> 声音效果</label>
+                    <div class="setting-options">
+                        <button class="setting-btn active" data-sound="default" onclick="setScratchSound('default')">
+                            <i class="fas fa-volume-up"></i> 默认
+                        </button>
+                        <button class="setting-btn" data-sound="coin" onclick="setScratchSound('coin')">
+                            <i class="fas fa-coins"></i> 硬币
+                        </button>
+                        <button class="setting-btn" data-sound="paper" onclick="setScratchSound('paper')">
+                            <i class="fas fa-file"></i> 纸张
+                        </button>
+                        <button class="setting-btn" data-sound="metal" onclick="setScratchSound('metal')">
+                            <i class="fas fa-tools"></i> 金属
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="hideScratchSettings()">
+                    <i class="fas fa-check"></i> 确定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/games.js"></script>
+    <script src="js/compatibility-handler.js"></script>
+    <script src="js/performance-optimizer.js"></script>
+    <script src="js/canvas-scratch-engine.js"></script>
+    <script src="js/enhanced-scratch-effects.js"></script>
+    <script src="js/advanced-visual-effects.js"></script>
+    <script src="js/canvas-scratch-integration.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
