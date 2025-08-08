@@ -21,30 +21,43 @@ function closeModal(modalId) {
 // 登录处理
 async function login(event) {
     event.preventDefault();
-    
+
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
-    
+
     try {
         showMessage('正在登录...', 'info');
-        
+
         const response = await api.login(username, password);
-        
+
         // 保存token
         api.setToken(response.access_token);
-        
+
         // 获取用户信息
         await loadCurrentUser();
-        
+
+        // 检查是否为管理员
+        console.log('检查管理员权限，当前用户:', currentUser);
+        const isAdmin = currentUser && (currentUser.is_admin === true || currentUser.role === 'admin' || currentUser.username === 'admin');
+
+        if (isAdmin) {
+            // 管理员跳转到后台管理页面
+            showMessage('管理员登录成功，正在跳转到后台管理...', 'success');
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1500);
+            return;
+        }
+
         // 更新UI
         updateAuthUI();
         closeModal('login-modal');
-        
+
         showMessage('登录成功！', 'success');
-        
+
         // 清空表单
         document.getElementById('login-form').reset();
-        
+
     } catch (error) {
         handleApiError(error);
     }
@@ -81,10 +94,11 @@ async function register(event) {
 // 退出登录
 function logout() {
     api.clearToken();
+    localStorage.removeItem('currentUser');
     currentUser = null;
     updateAuthUI();
     showMessage('已退出登录', 'info');
-    
+
     // 跳转到首页
     showSection('home');
 }
@@ -93,10 +107,16 @@ function logout() {
 async function loadCurrentUser() {
     try {
         currentUser = await api.getCurrentUser();
+
+        // 保存用户信息到localStorage，方便管理后台使用
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        console.log('用户信息已保存:', currentUser);
+
         return currentUser;
     } catch (error) {
         console.error('获取用户信息失败:', error);
         api.clearToken();
+        localStorage.removeItem('currentUser');
         currentUser = null;
         throw error;
     }

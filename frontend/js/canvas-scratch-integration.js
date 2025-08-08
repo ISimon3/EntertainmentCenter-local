@@ -749,18 +749,39 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             // 刮刀设置相关函数
-            window.showScratchSettings = function() {
-                document.getElementById('scratch-settings-modal').style.display = 'flex';
-            };
-
             window.hideScratchSettings = function() {
                 document.getElementById('scratch-settings-modal').style.display = 'none';
             };
+
+            // 刮刀设置管理
+            const scratchSettings = {
+                load: function() {
+                    const saved = localStorage.getItem('scratchSettings');
+                    if (saved) {
+                        return JSON.parse(saved);
+                    }
+                    return {
+                        tool: 'default',
+                        hardness: 'medium',
+                        effect: 'normal',
+                        sound: 'default'
+                    };
+                },
+                save: function(settings) {
+                    localStorage.setItem('scratchSettings', JSON.stringify(settings));
+                },
+                current: {}
+            };
+
+            // 初始化设置
+            scratchSettings.current = scratchSettings.load();
 
             window.setScratchTool = function(toolType) {
                 if (canvasScratchIntegration) {
                     canvasScratchIntegration.setScratchTool(toolType);
                 }
+                scratchSettings.current.tool = toolType;
+                scratchSettings.save(scratchSettings.current);
                 updateSettingButtons('tool', toolType);
             };
 
@@ -768,6 +789,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (canvasScratchIntegration) {
                     canvasScratchIntegration.setScratchHardness(hardness);
                 }
+                scratchSettings.current.hardness = hardness;
+                scratchSettings.save(scratchSettings.current);
                 updateSettingButtons('hardness', hardness);
             };
 
@@ -775,6 +798,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (canvasScratchIntegration) {
                     canvasScratchIntegration.setScratchEffects(effectType);
                 }
+                scratchSettings.current.effect = effectType;
+                scratchSettings.save(scratchSettings.current);
                 updateSettingButtons('effect', effectType);
             };
 
@@ -782,6 +807,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (canvasScratchIntegration) {
                     canvasScratchIntegration.setScratchSound(soundType);
                 }
+                scratchSettings.current.sound = soundType;
+                scratchSettings.save(scratchSettings.current);
                 updateSettingButtons('sound', soundType);
             };
 
@@ -795,6 +822,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             }
+
+            // 恢复保存的设置
+            function restoreSavedSettings() {
+                const settings = scratchSettings.current;
+
+                // 应用设置到引擎
+                if (canvasScratchIntegration) {
+                    canvasScratchIntegration.setScratchTool(settings.tool);
+                    canvasScratchIntegration.setScratchHardness(settings.hardness);
+                    canvasScratchIntegration.setScratchEffects(settings.effect);
+                    canvasScratchIntegration.setScratchSound(settings.sound);
+                }
+
+                // 更新UI按钮状态
+                updateSettingButtons('tool', settings.tool);
+                updateSettingButtons('hardness', settings.hardness);
+                updateSettingButtons('effect', settings.effect);
+                updateSettingButtons('sound', settings.sound);
+            }
+
+            // 在显示设置弹窗时恢复设置
+            window.showScratchSettings = function() {
+                document.getElementById('scratch-settings-modal').style.display = 'flex';
+                restoreSavedSettings();
+            };
             
             console.log('Canvas刮奖系统集成完成');
         } else {

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>娱乐中心 - 后台管理</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="admin-app">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>管理后台</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active">
+                        <a href="#dashboard" class="nav-link" onclick="showAdminSection('dashboard')">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>仪表盘</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#users" class="nav-link" onclick="showAdminSection('users')">
+                            <i class="fas fa-users"></i>
+                            <span>用户管理</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#games" class="nav-link" onclick="showAdminSection('games')">
+                            <i class="fas fa-gamepad"></i>
+                            <span>游戏管理</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#transactions" class="nav-link" onclick="showAdminSection('transactions')">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>交易记录</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#settings" class="nav-link" onclick="showAdminSection('settings')">
+                            <i class="fas fa-cog"></i>
+                            <span>系统设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>退出登录</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航 -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 id="page-title">仪表盘</h1>
+                </div>
+                <div class="header-right">
+                    <div class="admin-info">
+                        <span class="admin-name">管理员</span>
+                        <div class="admin-avatar">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <!-- 仪表盘 -->
+                <section id="dashboard-section" class="admin-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-users">0</h3>
+                                <p>总用户数</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-gamepad"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-games">0</h3>
+                                <p>总游戏次数</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-revenue">¥0</h3>
+                                <p>总收入</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="active-users">0</h3>
+                                <p>活跃用户</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>用户增长趋势</h3>
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-area"></i>
+                                <p>图表数据加载中...</p>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>游戏热度排行</h3>
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>图表数据加载中...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 用户管理 -->
+                <section id="users-section" class="admin-section">
+                    <div class="section-header">
+                        <h2>用户管理</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-primary" onclick="refreshUsers()">
+                                <i class="fas fa-sync"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>邮箱</th>
+                                    <th>余额</th>
+                                    <th>注册时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <!-- 用户数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 游戏管理 -->
+                <section id="games-section" class="admin-section">
+                    <div class="section-header">
+                        <h2>游戏管理</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-success" onclick="addGame()">
+                                <i class="fas fa-plus"></i> 添加游戏
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="games-grid">
+                        <div id="games-list">
+                            <!-- 游戏列表将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 交易记录 -->
+                <section id="transactions-section" class="admin-section">
+                    <div class="section-header">
+                        <h2>交易记录</h2>
+                        <div class="section-actions">
+                            <select class="filter-select" onchange="filterTransactions(this.value)">
+                                <option value="all">全部交易</option>
+                                <option value="game">游戏消费</option>
+                                <option value="win">中奖收入</option>
+                                <option value="recharge">充值</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>交易ID</th>
+                                    <th>用户</th>
+                                    <th>类型</th>
+                                    <th>金额</th>
+                                    <th>游戏</th>
+                                    <th>时间</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-table-body">
+                                <!-- 交易数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 系统设置 -->
+                <section id="settings-section" class="admin-section">
+                    <div class="section-header">
+                        <h2>系统设置</h2>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <h3>游戏设置</h3>
+                            <div class="setting-item">
+                                <label>默认用户余额:</label>
+                                <input type="number" id="default-credits" value="100" min="0">
+                            </div>
+                            <div class="setting-item">
+                                <label>最大投注金额:</label>
+                                <input type="number" id="max-bet" value="1000" min="1">
+                            </div>
+                            <button class="btn btn-primary" onclick="saveGameSettings()">保存设置</button>
+                        </div>
+                        
+                        <div class="setting-card">
+                            <h3>系统维护</h3>
+                            <div class="setting-item">
+                                <label>维护模式:</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="maintenance-mode">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>维护公告:</label>
+                                <textarea id="maintenance-notice" placeholder="请输入维护公告..."></textarea>
+                            </div>
+                            <button class="btn btn-warning" onclick="saveMaintenanceSettings()">保存设置</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- 消息提示 -->
+    <div id="admin-message" class="admin-message"></div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

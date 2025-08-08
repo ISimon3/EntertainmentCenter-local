@@ -818,6 +818,26 @@ body::before {
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
 }
 
+/* 管理员提示样式 */
+.admin-hint {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 10px;
+    text-align: center;
+    color: #856404;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.admin-hint i {
+    color: #ffc107;
+}
+
 .game-modal-body {
     padding: 2rem;
     text-align: center;
