@@ -16,7 +16,7 @@ from datetime import datetime
 class EntertainmentCenterGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("🎮 娱乐中心系统 - 控制面板")
+        self.root.title("🎮 西蒙尼斯娱乐城 - 控制面板")
         self.root.geometry("600x600")
         self.root.resizable(True, True)
         
