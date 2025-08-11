@@ -392,6 +392,28 @@
     <!-- 临时调试工具 -->
     <script>
         setTimeout(() => {
+            // 检查用户状态
+            console.log('🔍 检查用户状态:');
+            console.log('- localStorage token:', !!localStorage.getItem('token'));
+            console.log('- localStorage currentUser:', !!localStorage.getItem('currentUser'));
+            console.log('- window.currentUser:', !!window.currentUser);
+            console.log('- currentUser变量:', typeof currentUser !== 'undefined' ? !!currentUser : 'undefined');
+
+            // 如果有token但没有全局用户变量，尝试修复
+            if (localStorage.getItem('token') && localStorage.getItem('currentUser') && !window.currentUser) {
+                console.log('🔧 检测到用户状态不一致，尝试修复...');
+                try {
+                    const savedUser = JSON.parse(localStorage.getItem('currentUser'));
+                    window.currentUser = savedUser;
+                    if (typeof currentUser !== 'undefined') {
+                        currentUser = savedUser;
+                    }
+                    console.log('✅ 用户状态修复完成:', savedUser.username);
+                } catch (error) {
+                    console.log('❌ 用户状态修复失败:', error);
+                }
+            }
+
             // 检查Canvas集成模块初始化状态
             console.log('🔍 检查Canvas集成模块状态:');
             console.log('- CanvasScratchEngine:', !!window.CanvasScratchEngine);

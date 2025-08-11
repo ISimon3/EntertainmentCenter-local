@@ -216,10 +216,12 @@ const api = new API();
 // 错误处理工具
 function handleApiError(error) {
     console.error('API错误:', error);
-    
+
     if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        // 未授权，清除token并跳转到登录
+        // 未授权，清除token和用户信息并跳转到登录
         api.clearToken();
+        localStorage.removeItem('currentUser');
+        window.currentUser = null;
         updateAuthUI();
         showMessage('登录已过期，请重新登录', 'error');
         showLogin();

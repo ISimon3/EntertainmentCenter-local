@@ -312,6 +312,31 @@ function updateScratchGameControls() {
 
 // 开始新的刮刮乐游戏
 function startNewGame() {
+    console.log('🎮 startNewGame 函数被调用');
+    console.log('当前用户:', currentUser);
+    console.log('当前模板:', currentScratchTemplate);
+
+    // 检查用户登录状态
+    if (!requireAuth()) {
+        console.log('❌ 用户未登录，无法开始新游戏');
+        return;
+    }
+
+    // 检查当前模板是否存在
+    if (!currentScratchTemplate) {
+        console.log('❌ 当前模板不存在，尝试使用默认模板');
+        // 尝试从游戏模板中获取第一个可用的模板
+        if (gameTemplates.scratchCard && gameTemplates.scratchCard.length > 0) {
+            currentScratchTemplate = gameTemplates.scratchCard[0];
+            window.currentScratchTemplate = currentScratchTemplate;
+            console.log('✅ 使用默认模板:', currentScratchTemplate);
+        } else {
+            showMessage('没有可用的游戏模板，请刷新页面重试', 'error');
+            return;
+        }
+    }
+
+    // 开始新游戏
     startScratchCardGame();
 }
 

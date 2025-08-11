@@ -14,14 +14,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     // 检查登录状态
-    await checkAuthStatus();
-    
+    const isLoggedIn = await checkAuthStatus();
+    console.log('登录状态检查结果:', isLoggedIn);
+    console.log('当前用户状态 - currentUser:', !!window.currentUser);
+
     // 加载游戏模板
     await loadGameTemplates();
-    
+
     // 如果用户已登录，加载用户数据
-    if (currentUser) {
+    if (window.currentUser || currentUser) {
+        console.log('用户已登录，加载用户数据...');
         await loadUserData();
+    } else {
+        console.log('用户未登录，跳过用户数据加载');
     }
     
     console.log('系统初始化完成');

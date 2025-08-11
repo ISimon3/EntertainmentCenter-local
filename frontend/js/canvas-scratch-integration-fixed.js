@@ -493,10 +493,43 @@ function setupGlobalFunctions() {
     // 开始新游戏函数
     window.startNewGame = function() {
         console.log('=== 全局startNewGame函数被调用 ===');
+
+        // 检查用户登录状态
+        if (!window.currentUser) {
+            console.log('❌ 用户未登录');
+            if (window.showMessage) {
+                window.showMessage('请先登录', 'error');
+            }
+            if (window.showLogin) {
+                window.showLogin();
+            }
+            return;
+        }
+
+        // 检查模板是否存在
+        if (!window.currentScratchTemplate) {
+            console.log('❌ 当前模板不存在，尝试设置默认模板');
+            // 尝试从游戏模板中获取第一个可用的模板
+            if (window.gameTemplates && window.gameTemplates.scratchCard && window.gameTemplates.scratchCard.length > 0) {
+                window.currentScratchTemplate = window.gameTemplates.scratchCard[0];
+                console.log('✅ 使用默认模板:', window.currentScratchTemplate);
+            } else {
+                console.log('❌ 没有可用的游戏模板');
+                if (window.showMessage) {
+                    window.showMessage('没有可用的游戏模板，请刷新页面重试', 'error');
+                }
+                return;
+            }
+        }
+
         if (window.startScratchCardGame) {
+            console.log('✅ 调用startScratchCardGame函数');
             window.startScratchCardGame();
         } else {
-            console.log('startScratchCardGame函数不存在');
+            console.log('❌ startScratchCardGame函数不存在');
+            if (window.showMessage) {
+                window.showMessage('游戏功能暂时不可用，请刷新页面重试', 'error');
+            }
         }
     };
 
@@ -518,6 +551,75 @@ function setupGlobalFunctions() {
         const modal = document.getElementById('scratch-settings-modal');
         if (modal) {
             modal.style.display = 'none';
+        }
+    };
+
+    // 设置刮刀样式函数
+    window.setScratchTool = function(toolType) {
+        console.log('=== 设置刮刀样式 ===', toolType);
+
+        // 更新按钮状态
+        const buttons = document.querySelectorAll('[data-tool]');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-tool') === toolType) {
+                btn.classList.add('active');
+            }
+        });
+
+        // 如果Canvas集成模块存在，设置光标样式
+        if (window.canvasScratchIntegration && window.canvasScratchIntegration.engine) {
+            window.canvasScratchIntegration.engine.setScratchCursor(toolType);
+            console.log(`刮刀样式已设置为: ${toolType}`);
+        } else {
+            console.log('Canvas集成模块不存在，无法设置刮刀样式');
+        }
+    };
+
+    // 设置刮刀硬度函数
+    window.setScratchHardness = function(hardness) {
+        console.log('=== 设置刮刀硬度 ===', hardness);
+
+        // 更新按钮状态
+        const buttons = document.querySelectorAll('[data-hardness]');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-hardness') === hardness) {
+                btn.classList.add('active');
+            }
+        });
+
+        // 如果Canvas集成模块存在，设置硬度
+        if (window.canvasScratchIntegration && window.canvasScratchIntegration.engine) {
+            window.canvasScratchIntegration.engine.setScratchHardness(hardness);
+            console.log(`刮刀硬度已设置为: ${hardness}`);
+        } else {
+            console.log('Canvas集成模块不存在，无法设置刮刀硬度');
+        }
+    };
+
+    // 设置特效模式函数
+    window.setScratchEffects = function(effectType) {
+        console.log('=== 设置特效模式 ===', effectType);
+
+        // 更新按钮状态
+        const buttons = document.querySelectorAll('[data-effect]');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-effect') === effectType) {
+                btn.classList.add('active');
+            }
+        });
+
+        // 如果Canvas集成模块存在，设置特效
+        if (window.canvasScratchIntegration && window.canvasScratchIntegration.effects) {
+            // 这里可以根据需要设置不同的特效模式
+            // 目前先记录日志，后续可以扩展特效系统
+            console.log(`特效模式已设置为: ${effectType}`);
+            showMessage(`特效模式已切换为: ${effectType}`, 'info');
+        } else {
+            console.log('Canvas特效系统不存在，无法设置特效模式');
+            showMessage('特效系统暂时不可用', 'info');
         }
     };
 

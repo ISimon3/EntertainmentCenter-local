@@ -1,7 +1,8 @@
 // 认证相关功能 - 刮刮乐专用版本
 
-// 当前用户信息
+// 当前用户信息 - 设置为全局变量
 let currentUser = null;
+window.currentUser = null;
 
 // 显示登录模态框
 function showLogin() {
@@ -96,6 +97,7 @@ function logout() {
     api.clearToken();
     localStorage.removeItem('currentUser');
     currentUser = null;
+    window.currentUser = null;
     updateAuthUI();
     showMessage('已退出登录', 'info');
 
@@ -108,6 +110,9 @@ async function loadCurrentUser() {
     try {
         currentUser = await api.getCurrentUser();
 
+        // 同时设置全局变量
+        window.currentUser = currentUser;
+
         // 保存用户信息到localStorage，方便管理后台使用
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         console.log('用户信息已保存:', currentUser);
@@ -118,6 +123,7 @@ async function loadCurrentUser() {
         api.clearToken();
         localStorage.removeItem('currentUser');
         currentUser = null;
+        window.currentUser = null;
         throw error;
     }
 }
@@ -143,21 +149,54 @@ function updateAuthUI() {
 
 // 检查登录状态
 async function checkAuthStatus() {
+    console.log('🔍 开始检查登录状态...');
+
     const token = localStorage.getItem('token');
-    
+    const savedUser = localStorage.getItem('currentUser');
+
+    console.log('Token存在:', !!token);
+    console.log('保存的用户信息存在:', !!savedUser);
+
+    // 如果有保存的用户信息，先恢复它
+    if (savedUser) {
+        try {
+            const userObj = JSON.parse(savedUser);
+            currentUser = userObj;
+            window.currentUser = userObj;
+            console.log('✅ 从localStorage恢复用户信息:', userObj.username);
+            console.log('✅ 全局变量设置完成 - window.currentUser:', !!window.currentUser);
+        } catch (error) {
+            console.log('❌ 解析保存的用户信息失败:', error);
+            localStorage.removeItem('currentUser');
+        }
+    }
+
     if (token) {
         api.setToken(token);
         try {
             await loadCurrentUser();
+            console.log('✅ 用户信息加载成功');
+            console.log('✅ currentUser:', !!currentUser);
+            console.log('✅ window.currentUser:', !!window.currentUser);
             updateAuthUI();
             return true;
         } catch (error) {
-            console.log('Token已过期或无效');
+            console.log('❌ Token已过期或无效:', error);
             api.clearToken();
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            window.currentUser = null;
             updateAuthUI();
             return false;
         }
     } else {
+        // 没有token但有用户信息，清除用户信息
+        if (currentUser || window.currentUser) {
+            console.log('🗑️ 没有token，清除用户信息');
+            currentUser = null;
+            window.currentUser = null;
+            localStorage.removeItem('currentUser');
+        }
         updateAuthUI();
         return false;
     }
@@ -165,11 +204,25 @@ async function checkAuthStatus() {
 
 // 需要登录的操作检查
 function requireAuth() {
-    if (!currentUser) {
+    // 检查本地变量和全局变量
+    const user = currentUser || window.currentUser;
+
+    if (!user) {
+        console.log('requireAuth检查失败 - 用户未登录');
+        console.log('currentUser:', currentUser);
+        console.log('window.currentUser:', window.currentUser);
+        console.log('localStorage token:', localStorage.getItem('token'));
+
         showMessage('请先登录', 'error');
         showLogin();
         return false;
     }
+
+    // 确保两个变量都同步
+    if (!currentUser) currentUser = user;
+    if (!window.currentUser) window.currentUser = user;
+
+    console.log('requireAuth检查通过 - 用户已登录:', user.username);
     return true;
 }
 
