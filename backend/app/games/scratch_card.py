@@ -331,29 +331,43 @@ class ScratchCardGame:
     def _calculate_win_result(self, template: ScratchCardTemplate, areas: List[ScratchArea]) -> Tuple[bool, Dict[str, Any]]:
         """计算中奖结果"""
         winner_areas = [area for area in areas if area.is_winner]
-        
+
+        print(f"=== 计算中奖结果 ===")
+        print(f"中奖区域数量: {len(winner_areas)}")
+        print(f"模板类型: {template.card_type}")
+
         if not winner_areas:
-            return False, {"name": "谢谢参与", "credits": 0}
+            result = {"name": "谢谢参与", "credits": 0}
+            print(f"未中奖，返回: {result}")
+            return False, result
         
         # 根据中奖区域确定奖品信息
         if template.card_type == ScratchCardType.DIRECT_PRIZE:
             winner_area = winner_areas[0]
+            print(f"直接奖金玩法，中奖区域内容: {winner_area.content}")
             for prize in template.prizes:
                 if prize["display"] == winner_area.content:
+                    print(f"找到匹配奖品: {prize}")
                     return True, prize
-        
+
         elif template.card_type == ScratchCardType.SYMBOL_MATCH:
             winner_symbol = winner_areas[0].content
+            print(f"符号匹配玩法，中奖符号: {winner_symbol}")
             for prize in template.prizes:
                 if prize.get("symbol") == winner_symbol:
+                    print(f"找到匹配奖品: {prize}")
                     return True, prize
-        
+
         elif template.card_type == ScratchCardType.LUCKY_SYMBOL:
+            print(f"幸运符号玩法")
             for prize in template.prizes:
                 if prize["credits"] > 0:
+                    print(f"找到中奖奖品: {prize}")
                     return True, prize
-        
-        return False, {"name": "谢谢参与", "credits": 0}
+
+        fallback_result = {"name": "谢谢参与", "credits": 0}
+        print(f"没有找到匹配奖品，返回: {fallback_result}")
+        return False, fallback_result
     
     def scratch_area(self, card_data: Dict[str, Any], area_id: int) -> Dict[str, Any]:
         """刮开指定区域"""

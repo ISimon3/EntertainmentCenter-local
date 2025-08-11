@@ -1506,3 +1506,26 @@ body::before {
         margin: 10px;
     }
 }
+
+/* 金额获得动画 */
+@keyframes pointsGain {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    40% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -80%) scale(1);
+    }
+}
+
+.points-gain-animation {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}

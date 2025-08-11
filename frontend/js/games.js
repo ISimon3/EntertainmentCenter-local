@@ -11,6 +11,10 @@ let gameTemplates = {
 let currentScratchCard = null;
 let currentScratchTemplate = null;
 
+// 确保这些变量也是全局可访问的
+window.currentScratchCard = null;
+window.currentScratchTemplate = null;
+
 // 加载所有游戏模板
 async function loadGameTemplates() {
     try {
@@ -116,17 +120,48 @@ async function playGame(gameType, template) {
 
 // 开始刮刮乐游戏
 async function startScratchCardGame() {
-    if (!currentScratchTemplate || !requireAuth()) return;
-    
+    console.log('🎮 startScratchCardGame 函数被调用');
+    console.log('当前模板:', currentScratchTemplate);
+    console.log('用户认证状态:', !!currentUser);
+
+    if (!currentScratchTemplate || !requireAuth()) {
+        console.log('❌ 条件检查失败，退出函数');
+        return;
+    }
+
     try {
+        console.log('📡 开始调用API...');
         showMessage('正在创建刮刮乐...', 'info');
-        
+
         const response = await api.playScratchCard(currentScratchTemplate.id);
+        console.log('✅ API调用成功，响应:', response);
+
         currentScratchCard = response.card_data;
-        
+
+        // 确保全局变量也被设置
+        window.currentScratchCard = currentScratchCard;
+
+        // 添加详细的调试信息
+        console.log('=== API响应数据 ===');
+        console.log('完整响应:', response);
+        console.log('卡片数据:', currentScratchCard);
+        console.log('是否中奖:', currentScratchCard.is_winner);
+        console.log('奖品信息:', currentScratchCard.prize_info);
+        console.log('用户金额:', response.user_credits);
+
+        // 特别检查prize_info字段
+        console.log('=== prize_info详细检查 ===');
+        console.log('prize_info存在:', 'prize_info' in currentScratchCard);
+        console.log('prize_info类型:', typeof currentScratchCard.prize_info);
+        console.log('prize_info内容:', JSON.stringify(currentScratchCard.prize_info, null, 2));
+        if (currentScratchCard.prize_info) {
+            console.log('credits字段:', currentScratchCard.prize_info.credits);
+            console.log('name字段:', currentScratchCard.prize_info.name);
+        }
+
         // 更新用户金额
         updateCreditsDisplay(response.user_credits);
-        
+
         // 渲染刮刮乐卡片
         renderScratchCard(currentScratchCard);
         
@@ -149,23 +184,35 @@ async function startScratchCardGame() {
 
 // 全部刮开
 function scratchAll() {
+    console.log('=== games.js scratchAll被调用 ===');
+    console.log('canvasScratchIntegration存在:', !!window.canvasScratchIntegration);
+
+    // 如果Canvas集成模块存在，优先使用Canvas版本
+    if (window.canvasScratchIntegration) {
+        console.log('调用Canvas集成模块的scratchAll');
+        window.canvasScratchIntegration.scratchAll();
+        return;
+    }
+
+    // 原始的刮刮乐逻辑（兼容模式）
+    console.log('使用原始scratchAll逻辑');
     if (!currentScratchCard) return;
-    
+
     currentScratchCard.areas.forEach((area, index) => {
         if (!area.is_scratched) {
             area.is_scratched = true;
-            
+
             const areaElement = document.querySelector(`[data-area-id="${index}"]`);
             areaElement.classList.add('scratched');
             areaElement.textContent = area.content;
             areaElement.onclick = null;
-            
+
             if (currentScratchCard.is_winner && area.content !== '谢谢参与') {
                 areaElement.classList.add('winner');
             }
         }
     });
-    
+
     showScratchGameResult();
     updateScratchGameControls();
 }

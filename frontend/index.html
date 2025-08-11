@@ -132,8 +132,8 @@
                 </div>
 
                 <div class="scratch-card-container">
-                    <div id="scratch-card" class="scratch-card">
-                        <!-- 刮刮乐卡片将动态生成 -->
+                    <div id="scratch-card-container" class="scratch-card">
+                        <!-- Canvas刮刮乐将在这里渲染 -->
                     </div>
 
                     <div class="game-controls">
@@ -386,7 +386,532 @@
     <script src="js/canvas-scratch-engine.js"></script>
     <script src="js/enhanced-scratch-effects.js"></script>
     <script src="js/advanced-visual-effects.js"></script>
-    <script src="js/canvas-scratch-integration.js"></script>
+    <script src="js/canvas-scratch-integration-fixed.js" onload="console.log('✅ canvas-scratch-integration-fixed.js 加载成功')" onerror="console.error('❌ canvas-scratch-integration-fixed.js 加载失败')"></script>
     <script src="js/app.js"></script>
+
+    <!-- 临时调试工具 -->
+    <script>
+        setTimeout(() => {
+            // 检查Canvas集成模块初始化状态
+            console.log('🔍 检查Canvas集成模块状态:');
+            console.log('- CanvasScratchEngine:', !!window.CanvasScratchEngine);
+            console.log('- EnhancedScratchEffects:', !!window.EnhancedScratchEffects);
+            console.log('- CanvasScratchIntegration类:', !!window.CanvasScratchIntegration);
+            console.log('- canvasScratchIntegration实例:', !!window.canvasScratchIntegration);
+            console.log('- initializeCanvasIntegration函数:', !!window.initializeCanvasIntegration);
+            console.log('- renderScratchCard函数:', typeof window.renderScratchCard);
+
+            // 监控全局变量变化
+            let lastCardData = null;
+            setInterval(() => {
+                if (window.currentScratchCard !== lastCardData) {
+                    console.log('🔍 全局卡片数据发生变化:', {
+                        from: lastCardData,
+                        to: window.currentScratchCard,
+                        timestamp: new Date().toLocaleTimeString()
+                    });
+                    lastCardData = window.currentScratchCard;
+                }
+            }, 1000);
+
+            // 添加调试按钮
+            const debugBtn = document.createElement('button');
+            debugBtn.innerHTML = '🐛 调试奖励';
+            debugBtn.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                z-index: 9999;
+                background: #ff4444;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+            `;
+            debugBtn.onclick = () => {
+                console.log('=== 详细调试奖励信息 ===');
+                console.log('全局卡片数据:', window.currentScratchCard);
+                console.log('全局模板数据:', window.currentScratchTemplate);
+                console.log('Canvas集成模块:', window.canvasScratchIntegration);
+                console.log('Canvas集成模块的卡片数据:', window.canvasScratchIntegration?.currentCardData);
+
+                // 测试Canvas渲染
+                if (window.canvasScratchIntegration && window.currentScratchCard) {
+                    console.log('🧪 测试Canvas渲染...');
+                    window.canvasScratchIntegration.renderCanvasScratchCard(window.currentScratchCard);
+                }
+
+                // 检查所有可能的数据源
+                const dataSources = [
+                    { name: 'window.currentScratchCard', data: window.currentScratchCard },
+                    { name: 'canvasScratchIntegration.currentCardData', data: window.canvasScratchIntegration?.currentCardData },
+                    { name: 'canvasScratchIntegration.engine.cardData', data: window.canvasScratchIntegration?.engine?.cardData }
+                ];
+
+                let foundData = null;
+                let debugInfo = '数据源检查结果:\n\n';
+
+                dataSources.forEach(source => {
+                    debugInfo += `${source.name}:\n`;
+                    if (source.data) {
+                        debugInfo += `  存在: 是\n`;
+                        debugInfo += `  中奖: ${source.data.is_winner}\n`;
+                        debugInfo += `  奖品: ${JSON.stringify(source.data.prize_info)}\n`;
+
+                        if (source.data.is_winner && source.data.prize_info?.credits > 0) {
+                            foundData = source.data;
+                        }
+                    } else {
+                        debugInfo += `  存在: 否\n`;
+                    }
+                    debugInfo += '\n';
+                });
+
+                console.log(debugInfo);
+                alert(debugInfo);
+
+                if (foundData) {
+                    const prize = foundData.prize_info;
+                    alert(`找到中奖数据！
+奖品名称: ${prize.name}
+奖励金额: ${prize.credits} 元`);
+                    showCorrectRewardModal(prize);
+                } else {
+                    alert('所有数据源都没有找到有效的中奖数据！');
+                }
+            };
+            document.body.appendChild(debugBtn);
+
+            // 添加Canvas测试按钮
+            const canvasTestBtn = document.createElement('button');
+            canvasTestBtn.innerHTML = '🎨 测试Canvas';
+            canvasTestBtn.style.cssText = `
+                position: fixed;
+                top: 120px;
+                right: 20px;
+                z-index: 10000;
+                padding: 10px;
+                background: #28a745;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            `;
+            canvasTestBtn.onclick = () => {
+                console.log('=== Canvas测试开始 ===');
+
+                // 检查容器
+                const container = document.getElementById('scratch-card-container');
+                console.log('容器存在:', !!container);
+                if (container) {
+                    console.log('容器尺寸:', container.offsetWidth, 'x', container.offsetHeight);
+                }
+
+                // 检查Canvas集成模块
+                console.log('Canvas集成模块存在:', !!window.canvasScratchIntegration);
+
+                // 创建测试数据
+                const testData = {
+                    template_id: "welfare_lottery",
+                    template_name: "福利彩票刮刮乐",
+                    card_type: "lucky_symbol",
+                    theme: "福利彩票",
+                    cost: 10,
+                    layout: { cols: 6, rows: 5 },
+                    areas: [
+                        { id: 0, content: "🍎", is_scratched: false, is_winner: false },
+                        { id: 1, content: "🍊", is_scratched: false, is_winner: false },
+                        { id: 2, content: "🍌", is_scratched: false, is_winner: false },
+                        { id: 3, content: "🍇", is_scratched: false, is_winner: false },
+                        { id: 4, content: "🎁", is_scratched: false, is_winner: true },
+                        { id: 5, content: "🍎", is_scratched: false, is_winner: false }
+                    ],
+                    is_winner: true,
+                    prize_info: {
+                        name: "幸运奖金",
+                        credits: 50,
+                        type: "credits"
+                    },
+                    user_id: 1
+                };
+
+                // 设置全局数据
+                window.currentScratchCard = testData;
+                window.currentScratchTemplate = {
+                    id: 'welfare_lottery',
+                    name: '福利彩票刮刮乐',
+                    layout: { cols: 6, rows: 5 }
+                };
+
+                // 切换到刮刮乐页面
+                showSection('scratch-card-game');
+
+                // 调用渲染函数
+                if (window.canvasScratchIntegration) {
+                    console.log('调用Canvas渲染...');
+                    window.canvasScratchIntegration.renderCanvasScratchCard(testData);
+                } else {
+                    console.error('Canvas集成模块不存在');
+                }
+            };
+            document.body.appendChild(canvasTestBtn);
+
+            // 添加手动开始游戏按钮
+            const startGameBtn = document.createElement('button');
+            startGameBtn.style.cssText = `
+                position: fixed;
+                top: 60px;
+                right: 10px;
+                z-index: 9999;
+                background: #44ff44;
+                color: black;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+            `;
+            startGameBtn.textContent = '🎮 开始游戏';
+            startGameBtn.onclick = async () => {
+                console.log('=== 🎮 开始游戏按钮被点击 ===');
+                console.log('按钮点击时间:', new Date().toLocaleTimeString());
+
+                try {
+                    // 使用现有的API实例
+                    if (!window.api) {
+                        console.error('API实例不存在');
+                        return;
+                    }
+
+                    console.log('🎮 调用刮刮乐API...');
+                    const result = await window.api.playScratchCard('welfare_lottery');
+                    console.log('🎉 游戏结果:', result);
+
+                    let totalCredits = 0;
+                    let prizeName = '谢谢参与';
+
+                    if (result.is_winner && result.prize_info) {
+                        totalCredits = result.prize_info.credits || 0;
+                        prizeName = result.prize_info.name || '奖金';
+                    }
+
+                    console.log('中奖状态:', result.is_winner);
+                    console.log('奖品名称:', prizeName);
+                    console.log('奖金金额:', totalCredits);
+
+                    // 显示简单的alert结果
+                    alert(`游戏结果:\n中奖状态: ${result.is_winner}\n奖品: ${prizeName}\n金额: ${totalCredits}元`);
+
+                } catch (error) {
+                    console.error('游戏失败:', error);
+                    alert('游戏失败: ' + error.message);
+                }
+
+                // 检查登录状态
+                console.log('当前用户:', window.currentUser);
+                console.log('API token:', window.api?.token);
+
+                // 直接调用刮刮乐API
+                console.log('🎮 直接调用刮刮乐API...');
+                try {
+                    const result = await window.api.playScratchCard('welfare_lottery');
+                    console.log('🎉 游戏结果:', result);
+
+                    // 保存到全局变量
+                    window.currentScratchCard = result;
+
+                    // 手动创建奖励弹窗
+                    console.log('🏆 手动创建奖励弹窗...');
+
+                    let totalCredits = 0;
+                    let prizeName = '谢谢参与';
+
+                    if (result.is_winner && result.prize_info) {
+                        totalCredits = result.prize_info.credits || 0;
+                        prizeName = result.prize_info.name || '奖金';
+                    }
+
+                    console.log('中奖状态:', result.is_winner);
+                    console.log('奖品名称:', prizeName);
+                    console.log('奖金金额:', totalCredits);
+
+                    // 移除已存在的弹窗
+                    const existingModal = document.getElementById('simple-reward-modal');
+                    if (existingModal) {
+                        existingModal.remove();
+                    }
+
+                } catch (error) {
+                    console.error('API调用失败:', error);
+                    alert('游戏失败: ' + error.message);
+                }
+
+                // 设置默认模板
+                if (!window.currentScratchTemplate) {
+                    window.currentScratchTemplate = { id: 'welfare_lottery', name: '福利彩票刮刮乐' };
+                    console.log('设置默认模板:', window.currentScratchTemplate);
+                }
+
+                // 手动创建Canvas集成模块实例
+                if (!window.canvasScratchIntegration && window.CanvasScratchIntegration) {
+                    console.log('手动创建Canvas集成模块实例...');
+                    window.canvasScratchIntegration = new window.CanvasScratchIntegration();
+                }
+
+                // 先尝试初始化Canvas集成模块
+                if (window.initializeCanvasIntegration) {
+                    window.initializeCanvasIntegration();
+                } else if (window.canvasScratchIntegration) {
+                    console.log('使用手动创建的Canvas集成模块实例');
+                }
+
+                if (window.startScratchCardGame) {
+                    try {
+                        await window.startScratchCardGame();
+                    } catch (error) {
+                        console.error('游戏开始失败:', error);
+                    }
+                } else {
+                    console.log('❌ startScratchCardGame 函数不存在');
+
+                    // 如果startScratchCardGame不存在，直接调用API测试中奖
+                    console.log('🎮 直接调用刮刮乐API...');
+                    try {
+                        const result = await window.api.playScratchCard('welfare_lottery');
+                        console.log('🎉 游戏结果:', result);
+
+                        // 保存到全局变量
+                        window.currentScratchCard = result;
+
+                        // 手动创建奖励弹窗
+                        console.log('🏆 手动创建奖励弹窗...');
+
+                        let totalCredits = 0;
+                        let prizeName = '谢谢参与';
+
+                        if (result.is_winner && result.prize_info) {
+                            totalCredits = result.prize_info.credits || 0;
+                            prizeName = result.prize_info.name || '奖金';
+                        }
+
+                        console.log('中奖状态:', result.is_winner);
+                        console.log('奖品名称:', prizeName);
+                        console.log('奖金金额:', totalCredits);
+
+                        // 创建简单的奖励弹窗
+                        const modalHTML =
+                            '<div id="simple-reward-modal" style="' +
+                                'position: fixed;' +
+                                'top: 0;' +
+                                'left: 0;' +
+                                'width: 100%;' +
+                                'height: 100%;' +
+                                'background: rgba(0,0,0,0.8);' +
+                                'display: flex;' +
+                                'justify-content: center;' +
+                                'align-items: center;' +
+                                'z-index: 10000;' +
+                            '">' +
+                                '<div style="' +
+                                    'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);' +
+                                    'padding: 40px;' +
+                                    'border-radius: 20px;' +
+                                    'text-align: center;' +
+                                    'color: white;' +
+                                    'box-shadow: 0 20px 40px rgba(0,0,0,0.3);' +
+                                    'max-width: 400px;' +
+                                    'width: 90%;' +
+                                '">' +
+                                    '<h2 style="margin: 0 0 20px 0; font-size: 24px;">🎉 恭喜中奖</h2>' +
+                                    '<div style="font-size: 18px; margin: 15px 0;">' +
+                                        '奖品：' + prizeName +
+                                    '</div>' +
+                                    '<div style="font-size: 32px; font-weight: bold; margin: 20px 0; color: #FFD700;">' +
+                                        '总金额: ' + totalCredits + ' 元' +
+                                    '</div>' +
+                                    '<button onclick="document.getElementById(\'simple-reward-modal\').remove()" style="' +
+                                        'background: #4CAF50;' +
+                                        'color: white;' +
+                                        'border: none;' +
+                                        'padding: 12px 30px;' +
+                                        'border-radius: 25px;' +
+                                        'font-size: 16px;' +
+                                        'cursor: pointer;' +
+                                        'margin-top: 20px;' +
+                                    '">确定</button>' +
+                                '</div>' +
+                            '</div>';
+
+                        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                    } catch (error) {
+                        console.error('API调用失败:', error);
+                    }
+                }
+            };
+            document.body.appendChild(startGameBtn);
+
+            // 添加API测试按钮
+            const testApiBtn = document.createElement('button');
+            testApiBtn.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 10px;
+                z-index: 9999;
+                background: #ff4444;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+            `;
+            testApiBtn.textContent = '🔧 测试API';
+            testApiBtn.onclick = async () => {
+                console.log('=== API测试开始 ===');
+
+                // 手动定义API类（如果不存在）
+                if (!window.API) {
+                    console.log('手动创建API类...');
+                    window.API = class API {
+                        constructor() {
+                            this.baseURL = 'http://localhost:8000';
+                            this.token = localStorage.getItem('token');
+                        }
+
+                        setToken(token) {
+                            this.token = token;
+                            localStorage.setItem('token', token);
+                        }
+
+                        getHeaders() {
+                            const headers = { 'Content-Type': 'application/json' };
+                            if (this.token) {
+                                headers['Authorization'] = `Bearer ${this.token}`;
+                            }
+                            return headers;
+                        }
+
+                        async playScratchCard(templateId) {
+                            const response = await fetch(`${this.baseURL}/api/games/scratch-card/play`, {
+                                method: 'POST',
+                                headers: this.getHeaders(),
+                                body: JSON.stringify({ template_id: templateId })
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                            }
+
+                            return await response.json();
+                        }
+
+                        async getCurrentUser() {
+                            const response = await fetch(`${this.baseURL}/api/auth/me`, {
+                                headers: this.getHeaders()
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                            }
+
+                            return await response.json();
+                        }
+                    };
+                }
+
+                // 创建API实例
+                if (!window.api) {
+                    console.log('创建API实例...');
+                    window.api = new window.API();
+                }
+
+                // 检查基本状态
+                console.log('当前用户:', window.currentUser);
+                console.log('API实例:', window.api);
+                console.log('API类:', window.API);
+                console.log('API token:', window.api?.token);
+                console.log('localStorage token:', localStorage.getItem('token'));
+
+                // 测试API连接
+                try {
+                    console.log('测试API连接...');
+                    const response = await fetch('http://localhost:8000/health');
+                    console.log('健康检查响应:', response.status);
+
+                    if (window.api && window.api.token) {
+                        console.log('测试用户信息API...');
+                        const userInfo = await window.api.getCurrentUser();
+                        console.log('用户信息API响应:', userInfo);
+
+                        console.log('测试刮刮乐API...');
+                        const gameResponse = await window.api.playScratchCard('welfare_lottery');
+                        console.log('🎉 游戏API响应:', gameResponse);
+
+                        // 检查响应中的prize_info
+                        if (gameResponse && gameResponse.card_data) {
+                            console.log('=== 游戏数据检查 ===');
+                            console.log('is_winner:', gameResponse.card_data.is_winner);
+                            console.log('prize_info:', gameResponse.card_data.prize_info);
+                            console.log('prize_info存在:', 'prize_info' in gameResponse.card_data);
+                        }
+                    } else {
+                        console.log('❌ 没有有效的API token');
+                    }
+                } catch (error) {
+                    console.error('API测试失败:', error);
+                }
+            };
+            document.body.appendChild(testApiBtn);
+
+            // 强制显示正确奖励的函数
+            window.showCorrectRewardModal = function(prize) {
+                // 移除已存在的弹窗
+                const existingModal = document.getElementById('reward-modal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+
+                // 创建正确的奖励弹窗
+                const modalHTML = `
+                    <div id="reward-modal" class="modal-overlay" style="display: flex;">
+                        <div class="modal-content reward-modal">
+                            <div class="modal-header">
+                                <h3><i class="fas fa-trophy"></i> 奖励结算 ✨</h3>
+                                <button class="modal-close" onclick="document.getElementById('reward-modal').remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="reward-summary">
+                                    <div class="total-points">
+                                        <i class="fas fa-coins"></i>
+                                        <span>总金额: ${prize.credits} 元</span>
+                                    </div>
+                                </div>
+                                <div class="reward-items">
+                                    <div class="reward-item">
+                                        <i class="fas fa-coins"></i>
+                                        <span>${prize.name}</span>
+                                        <span class="points">+${prize.credits} 元</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary" onclick="document.getElementById('reward-modal').remove()">
+                                    <i class="fas fa-check"></i> 确认收取
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            };
+
+        }, 3000);
+    </script>
 </body>
 </html>

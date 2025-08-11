@@ -76,6 +76,12 @@ async def play_scratch_card(
         
         # 创建刮刮乐卡片
         card_data = scratch_card_game.create_card(request.template_id, current_user.id)
+
+        # 添加调试信息
+        print(f"=== 后端生成的卡片数据 ===")
+        print(f"is_winner: {card_data.get('is_winner')}")
+        print(f"prize_info: {card_data.get('prize_info')}")
+        print(f"完整card_data: {card_data}")
         
         # 记录游戏前的金额
         credits_before = current_user.credits

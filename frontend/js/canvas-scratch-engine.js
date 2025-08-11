@@ -98,17 +98,21 @@ class CanvasScratchEngine {
      * 创建Canvas图层
      */
     createCanvasLayers() {
+        console.log('=== 开始创建Canvas图层 ===');
         const { width, height } = this.options;
-        
+        console.log('Canvas尺寸:', width, 'x', height);
+        console.log('容器存在:', !!this.container);
+
         // 创建主容器
         this.container.style.position = 'relative';
         this.container.style.width = `${width}px`;
         this.container.style.height = `${height}px`;
         this.container.innerHTML = '';
-        
+
         // 创建各个图层
         const layerNames = ['background', 'scratch', 'particles', 'ui'];
         layerNames.forEach((name, index) => {
+            console.log(`创建${name}图层...`);
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
@@ -117,19 +121,24 @@ class CanvasScratchEngine {
             canvas.style.top = '0';
             canvas.style.zIndex = index;
             canvas.style.pointerEvents = name === 'scratch' ? 'auto' : 'none';
-            
+
             this.container.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
             this.layers[name] = {
                 canvas: canvas,
-                ctx: canvas.getContext('2d')
+                ctx: ctx
             };
+            console.log(`${name}图层创建完成:`, !!this.layers[name], !!this.layers[name].ctx);
         });
-        
+
         // 设置刮奖层为可交互
         this.layers.scratch.canvas.style.pointerEvents = 'auto';
 
         // 设置自定义刮刀光标
         this.setScratchCursor('default');
+
+        console.log('✅ 所有Canvas图层创建完成');
+        console.log('最终layers状态:', Object.keys(this.layers));
     }
     
     /**
@@ -158,8 +167,16 @@ class CanvasScratchEngine {
      * 加载刮刮乐卡片
      */
     loadScratchCard(cardData, template) {
+        console.log('=== Canvas引擎加载卡片数据 ===');
+        console.log('传入的cardData:', cardData);
+        console.log('传入的template:', template);
+
         this.cardData = cardData;
         this.template = template;
+
+        console.log('引擎保存的cardData:', this.cardData);
+        console.log('卡片是否中奖:', this.cardData?.is_winner);
+        console.log('奖品信息:', this.cardData?.prize_info);
 
         // 绘制背景层（奖品内容）
         this.drawBackground();
@@ -575,8 +592,15 @@ class CanvasScratchEngine {
         // }
 
         // 触发完成回调
+        console.log('=== Canvas引擎刮奖完成 ===');
+        console.log('回调函数存在:', !!this.callbacks.onScratchComplete);
+        console.log('卡片数据:', this.cardData);
+
         if (this.callbacks.onScratchComplete) {
+            console.log('调用完成回调...');
             this.callbacks.onScratchComplete(this.cardData);
+        } else {
+            console.log('没有设置完成回调函数');
         }
 
         console.log('刮奖完成！');
@@ -586,6 +610,18 @@ class CanvasScratchEngine {
      * 全部刮开（只清除涂层，不触发完成回调）
      */
     scratchAll() {
+        console.log('=== Canvas引擎 scratchAll被调用 ===');
+        console.log('layers存在:', !!this.layers);
+        console.log('scratch层存在:', !!this.layers?.scratch);
+        console.log('scratch ctx存在:', !!this.layers?.scratch?.ctx);
+
+        // 安全检查
+        if (!this.layers || !this.layers.scratch || !this.layers.scratch.ctx) {
+            console.error('❌ Canvas图层未正确初始化，无法执行scratchAll');
+            console.log('当前layers状态:', this.layers);
+            return;
+        }
+
         // 只清除刮奖层，显示奖品
         const ctx = this.layers.scratch.ctx;
         const { width, height } = this.options;
@@ -595,7 +631,7 @@ class CanvasScratchEngine {
         this.scratchProgress = 1.0;
         this.scratchedPixels = this.totalPixels;
 
-        console.log('全部刮开完成');
+        console.log('✅ 全部刮开完成');
 
         // 注意：这里不调用 completeScratch()，避免触发完成回调
         // 由集成层来处理后续的结算逻辑

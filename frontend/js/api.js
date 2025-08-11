@@ -270,3 +270,9 @@ async function checkApiConnection() {
         return false;
     }
 }
+
+// 创建全局API实例
+const api = new API();
+window.api = api;
+
+console.log('API模块已加载，全局实例已创建');
